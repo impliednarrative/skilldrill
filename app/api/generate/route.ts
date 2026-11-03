@@ -15,7 +15,7 @@ export async function POST(req: Request) {
 Deconstruct the given educational standard or topic into exactly 5 sequential 10-minute instructional blocks (totaling 50 minutes, leaving buffer for transition and formative assessment).
 
 Design principles:
-1. Universal Design / Inclusive Design: Inherently incorporate accessible, multi-modal learning pathways.
+1. Universal Design / Inclusive Design: Inherently incorporate accessible, multi-modal learning pathways addressing diverse cognitive, physical, and sensory needs without requiring a separate accommodations list.
 2. Structure: Exactly 5 distinct blocks.
 
 You MUST return your response as a valid JSON object with this exact structure:
@@ -36,7 +36,7 @@ You MUST return your response as a valid JSON object with this exact structure:
     const userPrompt = `Target Standard/Topic: ${standard} ${gradeLevel ? `(Grade/Context: ${gradeLevel})` : ''}`;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3.8-flash',
       contents: [
         { role: 'user', parts: [{ text: systemPrompt }, { text: userPrompt }] }
       ],
