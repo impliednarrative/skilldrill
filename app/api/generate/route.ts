@@ -7,16 +7,17 @@ export async function POST(req: Request) {
   try {
     const { standard, gradeLevel } = await req.json();
 
-    if (!standard) {
-      return NextResponse.json({ error: 'Standard or topic is required' }, { status: 400 });
+    if (!standard || !gradeLevel) {
+      return NextResponse.json({ error: 'Standard and Grade Level/Context are required.' }, { status: 400 });
     }
 
     const systemPrompt = `You are an expert curriculum developer specializing in vocational, trades, and academic instruction. 
-Deconstruct the given educational standard or topic into exactly 5 sequential 10-minute instructional blocks (totaling 50 minutes, leaving buffer for transition and formative assessment).
+Deconstruct the given educational standard into exactly 5 sequential 10-minute instructional blocks (totaling 50 minutes).
 
-Design principles:
-1. Universal Design / Inclusive Design: Inherently incorporate accessible, multi-modal learning pathways addressing diverse cognitive, physical, and sensory needs without requiring a separate accommodations list.
-2. Structure: Exactly 5 distinct blocks.
+CRITICAL REQUIREMENTS:
+1. Zero Prep / Stand-Alone: Every block must contain fully realized, ready-to-use content. Do not tell the teacher to "create a handout" or "prepare questions"—provide the actual questions, text snippets, prompts, or problem sets right inside the block so the teacher can use it instantly with zero external prep.
+2. Universal Design / Inclusive Design: Inherently incorporate accessible, multi-modal learning pathways addressing cognitive, physical, and sensory needs without a separate accommodations list.
+3. Structure: Exactly 5 distinct blocks forming a cohesive 50-minute learning arc.
 
 You MUST return your response as a valid JSON object with this exact structure:
 {
@@ -27,13 +28,14 @@ You MUST return your response as a valid JSON object with this exact structure:
       "title": "Block Title",
       "duration": "10 Mins",
       "objective": "What students will accomplish",
-      "activity": "Step-by-step student activity description",
-      "inclusiveDesign": "How universal design is embedded"
+      "readyToUseContent": "The exact verbatim text, prompts, problem sets, or questions the teacher can project or hand out immediately (zero prep required).",
+      "activitySteps": "Clear execution steps for the teacher and students during the 10 minutes.",
+      "inclusiveDesign": "How universal design features (visual, tactile, auditory, or collaborative scaffolds) are natively embedded."
     }
   ]
 }`;
 
-    const userPrompt = `Target Standard/Topic: ${standard} ${gradeLevel ? `(Grade/Context: ${gradeLevel})` : ''}`;
+    const userPrompt = `Target Standard/Topic: ${standard} \nGrade Level / Context: ${gradeLevel}`;
 
     const response = await ai.models.generateContent({
       model: 'gemini-3.8-flash',

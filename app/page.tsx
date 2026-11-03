@@ -7,7 +7,8 @@ interface CurriculumBlock {
   title: string;
   duration: string;
   objective: string;
-  activity: string;
+  readyToUseContent: string; // Stand-alone content, zero prep required
+  activitySteps: string;
   inclusiveDesign: string;
 }
 
@@ -68,13 +69,14 @@ export default function Home() {
         </div>
 
         <div>
-          <label className="block text-sm font-semibold mb-1 text-slate-700">Grade Level / Context (Optional)</label>
+          <label className="block text-sm font-semibold mb-1 text-slate-700">Grade Level / Context</label>
           <input
             type="text"
             value={gradeLevel}
             onChange={(e) => setGradeLevel(e.target.value)}
             placeholder="e.g., 10th Grade Vocational Track"
             className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-slate-900"
+            required
           />
         </div>
 
@@ -94,7 +96,7 @@ export default function Home() {
           <div className="border-b pb-4">
             <h2 className="text-2xl font-bold text-slate-900">{curriculum.unitTitle}</h2>
             <span className="text-sm font-medium text-blue-600 bg-blue-50 px-3 py-1 rounded-full inline-block mt-2">
-              5 × 10-Minute Blocks (Universal Design Integrated)
+              5 × 10-Minute Blocks (Zero-Prep & Universal Design Integrated)
             </span>
           </div>
 
@@ -118,8 +120,12 @@ export default function Home() {
                   <div>
                     <span className="font-semibold text-slate-700">Objective:</span> {block.objective}
                   </div>
+                  <div className="bg-blue-50/50 p-3 rounded-lg border border-blue-100">
+                    <span className="font-semibold text-blue-900">Ready-to-Use Content (Zero Prep):</span> 
+                    <p className="mt-1 text-slate-700 whitespace-pre-wrap">{block.readyToUseContent}</p>
+                  </div>
                   <div>
-                    <span className="font-semibold text-slate-700">Activity Sequence:</span> {block.activity}
+                    <span className="font-semibold text-slate-700">Execution Steps:</span> {block.activitySteps}
                   </div>
                   <div className="bg-slate-50 p-3 rounded-lg border border-slate-100">
                     <span className="font-semibold text-slate-700">Inclusive Design:</span> {block.inclusiveDesign}
