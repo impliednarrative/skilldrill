@@ -62,7 +62,7 @@ export default function Home() {
             value={standard}
             onChange={(e) => setStandard(e.target.value)}
             placeholder="e.g., Introduction to Arc Welding Safety or Essay Thesis Construction"
-            className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+            className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-slate-900"
             required
           />
         </div>
@@ -74,7 +74,7 @@ export default function Home() {
             value={gradeLevel}
             onChange={(e) => setGradeLevel(e.target.value)}
             placeholder="e.g., 10th Grade Vocational Track"
-            className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+            className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-slate-900"
           />
         </div>
 
@@ -83,7 +83,7 @@ export default function Home() {
           disabled={loading}
           className="w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
         >
-          {loading ? 'Designing 5-Block Framework...' : 'Generate 50-Minute Curriculum'}
+          {loading ? 'Generating 5 10-minute activities...' : 'Generate 5 10-minute activities'}
         </button>
       </form>
 
