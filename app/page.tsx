@@ -1,124 +1,135 @@
 'use client';
+
 import { useState } from 'react';
 
+interface CurriculumBlock {
+  blockNumber: number;
+  title: string;
+  duration: string;
+  objective: string;
+  activity: string;
+  inclusiveDesign: string;
+}
+
+interface CurriculumResult {
+  unitTitle: string;
+  blocks: CurriculumBlock[];
+}
+
 export default function Home() {
-  const [formData, setFormData] = useState({
-    state: 'Colorado',
-    subject: 'ELA / Reading',
-    grade: 'Grade 6',
-    standardText: '',
-    sampleQuestion: '',
-    accommodations: 'ELL Sentence Frames',
-  });
+  const [standard, setStandard] = useState('');
+  const [gradeLevel, setGradeLevel] = useState('');
+  const [curriculum, setCurriculum] = useState<CurriculumResult | null>(null);
   const [loading, setLoading] = useState(false);
-  const [drillOutput, setDrillOutput] = useState('');
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setDrillOutput('');
+    setError('');
+    setCurriculum(null);
 
-    const res = await fetch('/api/generate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData),
-    });
+    try {
+      const res = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ standard, gradeLevel }),
+      });
 
-    const data = await res.json();
-    setDrillOutput(data.result);
-    setLoading(false);
+      const data = await res.json();
+      if (res.ok) {
+        setCurriculum(data.result);
+      } else {
+        setError(data.error || 'Failed to generate curriculum.');
+      }
+    } catch (err) {
+      setError('An unexpected network error occurred.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <main className="min-h-screen bg-slate-900 text-slate-100 p-6 md:p-12 max-w-5xl mx-auto">
-      <header className="mb-10 text-center">
-        <h1 className="text-4xl font-extrabold text-blue-400 tracking-tight">skilldrill.tech</h1>
-        <p className="text-slate-400 mt-2">The Pedagogical Order of Operations Engine</p>
-      </header>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <form onSubmit={handleSubmit} className="bg-slate-800 p-6 rounded-xl border border-slate-700 space-y-4">
-          <div className="grid grid-cols-3 gap-3">
-            <div>
-              <label className="block text-xs font-semibold text-slate-300">State</label>
-              <input
-                className="w-full bg-slate-700 p-2 rounded text-sm text-white mt-1 border border-slate-600"
-                value={formData.state}
-                onChange={(e) => setFormData({ ...formData, state: e.target.value })}
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-slate-300">Subject</label>
-              <input
-                className="w-full bg-slate-700 p-2 rounded text-sm text-white mt-1 border border-slate-600"
-                value={formData.subject}
-                onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-slate-300">Grade</label>
-              <input
-                className="w-full bg-slate-700 p-2 rounded text-sm text-white mt-1 border border-slate-600"
-                value={formData.grade}
-                onChange={(e) => setFormData({ ...formData, grade: e.target.value })}
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-slate-300">State Standard Text</label>
-            <textarea
-              required
-              rows={3}
-              placeholder="e.g., Cite textual evidence to support analysis of what the text says explicitly..."
-              className="w-full bg-slate-700 p-2 rounded text-sm text-white mt-1 border border-slate-600"
-              value={formData.standardText}
-              onChange={(e) => setFormData({ ...formData, standardText: e.target.value })}
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-slate-300">Sample Test Question (Optional)</label>
-            <textarea
-              rows={2}
-              placeholder="Paste a state sample test item..."
-              className="w-full bg-slate-700 p-2 rounded text-sm text-white mt-1 border border-slate-600"
-              value={formData.sampleQuestion}
-              onChange={(e) => setFormData({ ...formData, sampleQuestion: e.target.value })}
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-slate-300">Accommodations / Supports</label>
-            <input
-              className="w-full bg-slate-700 p-2 rounded text-sm text-white mt-1 border border-slate-600"
-              value={formData.accommodations}
-              onChange={(e) => setFormData({ ...formData, accommodations: e.target.value })}
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 bg-blue-600 hover:bg-blue-500 rounded font-bold text-white transition duration-200"
-          >
-            {loading ? 'Isolating Skill & Crafting Gameplay Loop...' : 'Generate Skill Drill'}
-          </button>
-        </form>
-
-        <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 overflow-y-auto max-h-[600px]">
-          <h2 className="text-xl font-bold text-blue-300 mb-4">Generated Active Drill</h2>
-          {drillOutput ? (
-            <div className="prose prose-invert text-slate-200 whitespace-pre-line text-sm leading-relaxed">
-              {drillOutput}
-            </div>
-          ) : (
-            <p className="text-slate-500 italic text-sm">
-              Input a standard and click generate to view the isolated micro-skill, gameplay loop, and targeted assessment items.
-            </p>
-          )}
+    <main className="max-w-4xl mx-auto p-6 font-sans">
+      <h1 className="text-3xl font-bold mb-2 text-slate-800">SkillDrill</h1>
+      <p className="text-slate-600 mb-6">5-Block Inclusive Curriculum & Micro-Skill Generator</p>
+      
+      <form onSubmit={handleSubmit} className="space-y-4 bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+        <div>
+          <label className="block text-sm font-semibold mb-1 text-slate-700">Standard / Topic</label>
+          <input
+            type="text"
+            value={standard}
+            onChange={(e) => setStandard(e.target.value)}
+            placeholder="e.g., Introduction to Arc Welding Safety or Essay Thesis Construction"
+            className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+            required
+          />
         </div>
-      </div>
+
+        <div>
+          <label className="block text-sm font-semibold mb-1 text-slate-700">Grade Level / Context (Optional)</label>
+          <input
+            type="text"
+            value={gradeLevel}
+            onChange={(e) => setGradeLevel(e.target.value)}
+            placeholder="e.g., 10th Grade Vocational Track"
+            className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+          />
+        </div>
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
+        >
+          {loading ? 'Designing 5-Block Framework...' : 'Generate 50-Minute Curriculum'}
+        </button>
+      </form>
+
+      {error && <div className="mt-4 p-4 bg-red-50 text-red-700 rounded-lg border border-red-200">{error}</div>}
+
+      {curriculum && (
+        <div className="mt-10 space-y-6">
+          <div className="border-b pb-4">
+            <h2 className="text-2xl font-bold text-slate-900">{curriculum.unitTitle}</h2>
+            <span className="text-sm font-medium text-blue-600 bg-blue-50 px-3 py-1 rounded-full inline-block mt-2">
+              5 × 10-Minute Blocks (Universal Design Integrated)
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6">
+            {curriculum.blocks?.map((block) => (
+              <div 
+                key={block.blockNumber} 
+                className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm hover:shadow-md transition relative overflow-hidden"
+              >
+                <div className="absolute top-0 left-0 w-2 h-full bg-blue-600"></div>
+                <div className="flex justify-between items-start mb-3">
+                  <h3 className="text-lg font-bold text-slate-800">
+                    Block {block.blockNumber}: {block.title}
+                  </h3>
+                  <span className="text-xs font-bold uppercase tracking-wider bg-slate-100 text-slate-700 px-2.5 py-1 rounded">
+                    {block.duration}
+                  </span>
+                </div>
+
+                <div className="space-y-3 text-sm text-slate-600">
+                  <div>
+                    <span className="font-semibold text-slate-700">Objective:</span> {block.objective}
+                  </div>
+                  <div>
+                    <span className="font-semibold text-slate-700">Activity Sequence:</span> {block.activity}
+                  </div>
+                  <div className="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                    <span className="font-semibold text-slate-700">Inclusive Design:</span> {block.inclusiveDesign}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </main>
   );
 }
