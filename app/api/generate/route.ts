@@ -1,34 +1,4 @@
 import { NextResponse } from 'next/server';
-import { GoogleGenAI } from '@google/genai';
-
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
-
-// Models to try in order if one returns a 503 or demand spike error
-const MODELS_TO_TRY = ['gemini-3.8-flash', 'gemini-2.5-flash'];
-
-async function generateWithRetry(prompt: string, retries = 2) {
-  for (const modelName of MODELS_TO_TRY) {
-    for (let attempt = 0; attempt <= retries; attempt++) {
-      try {
-        const response = await ai.models.generateContent({
-          model: modelName,
-          contents: prompt,
-        });
-
-        if (response && response.text) {
-          return response.text;
-        }
-      } catch (err: any) {
-        console.warn(`Attempt ${attempt + 1} with model ${modelName} failed:`, err?.message || err);
-        // If it's a 503 or rate limit, wait 1 second before retrying
-        if (attempt < retries) {
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-        }
-      }
-    }
-  }
-  throw new Error('All model endpoints are currently under high load. Please wait a moment and try again.');
-}
 
 export async function POST(req: Request) {
   try {
@@ -38,18 +8,24 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Standard and Grade Level/Context are required.' }, { status: 400 });
     }
 
-    const prompt = `You are an expert instructional designer. For the educational standard "${standard}" and grade level/context "${gradeLevel}", generate a 3-block micro-skill activity and a 3x3 card deck.
+    const prompt = `You are an expert instructional designer specializing in skills-based micro-activities and vocational/academic training.
+Deconstruct the given educational standard into exactly 3 sequential 10-minute instructional blocks (30 minutes total) AND provide a printable deck of content cards for a 3x3 grid (up to 9 double-sided cards).
 
-You must output your response STRICTLY as a valid JSON object with no markdown formatting around it, using this exact format:
+CRITICAL REQUIREMENTS:
+1. Zero Prep / Stand-Alone: Provide actual text, problem sets, or prompt content directly inside the card and block structures.
+2. Structure: 3 distinct 10-minute blocks + up to 9 cards with Front/Back data.
+3. Universal Design: Inherently incorporate accessible, multi-modal learning pathways.
+
+Return ONLY a valid JSON object with NO markdown wrapper using this exact schema:
 {
-  "unitTitle": "Short descriptive title",
+  "unitTitle": "Title of micro-skill plan",
   "blocks": [
     {
       "blockNumber": 1,
       "title": "Block Title",
       "duration": "10 Mins",
-      "objective": "Clear objective",
-      "readyToUseContent": "Exact text, questions, or prompt for teacher/students",
+      "objective": "What students accomplish",
+      "readyToUseContent": "Exact text or prompt for teacher/students",
       "activitySteps": "Step-by-step execution steps for 10 mins",
       "inclusiveDesign": "Universal design feature embedded"
     }
@@ -61,17 +37,43 @@ You must output your response STRICTLY as a valid JSON object with no markdown f
       "back": "Card back content"
     }
   ]
-}`;
+}
 
-    const rawResultText = await generateWithRetry(prompt);
+Target Standard/Topic: ${standard}
+Grade Level / Context: ${gradeLevel}`;
+
+    const apiResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
+        "HTTP-Referer": "https://skilldrill.tech", // Optional for OpenRouter rankings
+        "X-Title": "SkillDrill",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model: "deepseek/deepseek-r1:free", // Highly reliable free-tier model on OpenRouter
+        messages: [
+          { role: "user", content: prompt }
+        ],
+        response_format: { type: "json_object" }
+      })
+    });
+
+    if (!apiResponse.ok) {
+      const errorText = await apiResponse.text();
+      throw new Error(`OpenRouter API error: ${errorText}`);
+    }
+
+    const data = await apiResponse.json();
+    const rawContent = data.choices?.[0]?.message?.content || '{}';
     
-    // Clean up markdown code fence wrapper if present
-    const cleanedText = rawResultText.replace(/```json/g, '').replace(/```/g, '').trim();
+    // Clean up any markdown code block wrappers if the model includes them
+    const cleanedText = rawContent.replace(/```json/g, '').replace(/```/g, '').trim();
     const parsedData = JSON.parse(cleanedText);
 
     return NextResponse.json({ result: parsedData });
   } catch (error: any) {
-    console.error('Error in generate route:', error);
+    console.error('Error generating micro-skill plan via OpenRouter:', error);
     return NextResponse.json(
       { error: error.message || 'Failed to generate micro-skill plan.' },
       { status: 500 }
