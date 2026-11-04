@@ -17,33 +17,29 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Standard and Grade Level/Context are required.' }, { status: 400 });
     }
 
-    const prompt = `You are an expert instructional designer specializing in skills-based micro-activities.
-For the educational standard "${standard}" and grade level "${gradeLevel}", generate a 3-block micro-skill activity sequence AND a set of discrete, text-only content lines for card templates.
-
-CRITICAL CONSTRAINTS:
-1. Zero Prep / Stand-Alone: All prompts, text snippets, or problem sets must be fully written out.
-2. 3 Instructional Blocks: Exactly 3 sequential 10-minute blocks (30 minutes total).
-3. Text Card Lines: Generate between 9 and 18 discrete card text lines.
-4. WORD LIMIT: Each card text line MUST NOT exceed 50 words. Ensure the text is clean, direct, and completely readable on a single index/printable card.
+    const prompt = `You are an expert instructional designer specializing in skills-based, active micro-activities.
+For the educational standard "${standard}" and grade level "${gradeLevel}", generate:
+1. A master deck of 9 to 18 discrete card text lines (max 50 words per line) containing actionable data, prompts, problem sets, or scenarios. These cards are the physical engine of the lesson used for sorting, drawing, and task execution.
+2. Exactly 3 sequential 10-minute instructional blocks (30 minutes total). CRITICAL: Each block's "readyToUseContent" MUST explicitly instruct students and teachers on how to use specific cards from the deck to perform the hands-on task. 
 
 Return ONLY a valid JSON object with NO markdown code wrappers, using this exact schema:
 {
   "unitTitle": "Title of micro-skill plan",
+  "cardLines": [
+    {
+      "lineNumber": 1,
+      "text": "Actionable task, problem set, or scenario (STRICTLY max 50 words)."
+    }
+  ],
   "blocks": [
     {
       "blockNumber": 1,
       "title": "Block Title",
       "duration": "10 Mins",
       "objective": "Clear objective",
-      "readyToUseContent": "Exact text or prompt for teacher/students",
-      "activitySteps": "Step-by-step execution steps for 10 mins",
+      "readyToUseContent": "Exact instructions leveraging specific card lines (e.g., 'Students draw Card 3 and Card 7 to calculate...')",
+      "activitySteps": "Step-by-step execution for the 10 mins",
       "inclusiveDesign": "Universal design feature embedded"
-    }
-  ],
-  "cardLines": [
-    {
-      "lineNumber": 1,
-      "text": "Card content line (STRICTLY maximum 50 words)."
     }
   ]
 }`;
@@ -73,7 +69,6 @@ Return ONLY a valid JSON object with NO markdown code wrappers, using this exact
     const data = await apiResponse.json();
     const rawContent = data.choices?.[0]?.message?.content || '{}';
     
-    // Clean up markdown code block wrappers if present
     const cleanedText = rawContent.replace(/```json/g, '').replace(/```/g, '').trim();
     const parsedData = JSON.parse(cleanedText);
 

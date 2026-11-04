@@ -2,6 +2,11 @@
 
 import { useState } from 'react';
 
+interface CardLine {
+  lineNumber: number;
+  text: string;
+}
+
 interface CurriculumBlock {
   blockNumber: number;
   title: string;
@@ -12,15 +17,10 @@ interface CurriculumBlock {
   inclusiveDesign: string;
 }
 
-interface CardLine {
-  lineNumber: number;
-  text: string;
-}
-
 interface CurriculumResult {
   unitTitle: string;
-  blocks: CurriculumBlock[];
   cardLines: CardLine[];
+  blocks: CurriculumBlock[];
 }
 
 export default function Home() {
@@ -91,7 +91,7 @@ export default function Home() {
           disabled={loading}
           className="w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
         >
-          {loading ? 'Generating 3 10-minute activities...' : 'Generate 3 10-minute activities'}
+          {loading ? 'Generating 3 10-minute activities & cards...' : 'Generate 3 10-minute activities & cards'}
         </button>
       </form>
 
@@ -102,23 +102,23 @@ export default function Home() {
           <div className="border-b pb-4">
             <h2 className="text-2xl font-bold text-slate-900">{curriculum.unitTitle}</h2>
             <span className="text-sm font-medium text-blue-600 bg-blue-50 px-3 py-1 rounded-full inline-block mt-2">
-              3 × 10-Minute Blocks + Discrete Printable Text Lines
+              Master Card Deck + 3 × 10-Minute Skill Blocks
             </span>
           </div>
 
-          {/* Clean Printable Text Lines Section */}
+          {/* Master Card Deck Pool Section (Shown First as the Tool Source) */}
           {curriculum.cardLines && curriculum.cardLines.length > 0 && (
             <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 shadow-sm">
               <div className="mb-4">
-                <h3 className="text-xl font-bold text-slate-800">Printable Card Text Lines</h3>
+                <h3 className="text-xl font-bold text-slate-800">Master Card Deck Pool</h3>
                 <p className="text-sm text-slate-600">
-                  {curriculum.cardLines.length} discrete lines (max 50 words each). Copy and paste directly into your card templates.
+                  {curriculum.cardLines.length} discrete task lines (max 50 words each). Cut and paste these into your templates; they are actively referenced inside the blocks below.
                 </p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {curriculum.cardLines.map((card) => (
                   <div key={card.lineNumber} className="bg-white border border-slate-300 rounded-lg p-3 shadow-xs">
-                    <div className="text-xs font-bold text-blue-600 mb-1">LINE #{card.lineNumber}</div>
+                    <div className="text-xs font-bold text-blue-600 mb-1">CARD LINE #{card.lineNumber}</div>
                     <p className="text-sm text-slate-800 leading-relaxed">{card.text}</p>
                   </div>
                 ))}
@@ -126,9 +126,9 @@ export default function Home() {
             </div>
           )}
 
-          {/* 3-Block Instructional Arc */}
+          {/* 3-Block Instructional Arc (Using the Cards) */}
           <div className="space-y-6">
-            <h3 className="text-xl font-bold text-slate-800">30-Minute Activity Blocks</h3>
+            <h3 className="text-xl font-bold text-slate-800">30-Minute Skill Block Sequence</h3>
             <div className="grid grid-cols-1 gap-6">
               {curriculum.blocks?.map((block) => (
                 <div 
@@ -150,11 +150,11 @@ export default function Home() {
                       <span className="font-semibold text-slate-700">Objective:</span> {block.objective}
                     </div>
                     <div className="bg-blue-50/50 p-3 rounded-lg border border-blue-100">
-                      <span className="font-semibold text-blue-900">Ready-to-Use Content:</span> 
+                      <span className="font-semibold text-blue-900">Task Execution (Card Integration):</span> 
                       <p className="mt-1 text-slate-700 whitespace-pre-wrap">{block.readyToUseContent}</p>
                     </div>
                     <div>
-                      <span className="font-semibold text-slate-700">Execution Steps:</span> {block.activitySteps}
+                      <span className="font-semibold text-slate-700">Activity Steps:</span> {block.activitySteps}
                     </div>
                     <div className="bg-slate-50 p-3 rounded-lg border border-slate-100">
                       <span className="font-semibold text-slate-700">Inclusive Design:</span> {block.inclusiveDesign}
