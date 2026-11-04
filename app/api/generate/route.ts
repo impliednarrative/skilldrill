@@ -2,6 +2,15 @@ import { NextResponse } from 'next/server';
 
 export async function POST(req: Request) {
   try {
+    const apiKey = process.env.OPENROUTER_API_KEY;
+
+    if (!apiKey) {
+      return NextResponse.json(
+        { error: 'OPENROUTER_API_KEY is missing from server environment variables.' },
+        { status: 500 }
+      );
+    }
+
     const { standard, gradeLevel } = await req.json();
 
     if (!standard || !gradeLevel) {
@@ -45,13 +54,13 @@ Grade Level / Context: ${gradeLevel}`;
     const apiResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
-        "HTTP-Referer": "https://skilldrill.tech", // Optional for OpenRouter rankings
+        "Authorization": `Bearer ${apiKey.trim()}`,
+        "HTTP-Referer": "https://skilldrill.tech",
         "X-Title": "SkillDrill",
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "deepseek/deepseek-r1:free", // Highly reliable free-tier model on OpenRouter
+        model: "deepseek/deepseek-r1:free",
         messages: [
           { role: "user", content: prompt }
         ],
@@ -67,7 +76,6 @@ Grade Level / Context: ${gradeLevel}`;
     const data = await apiResponse.json();
     const rawContent = data.choices?.[0]?.message?.content || '{}';
     
-    // Clean up any markdown code block wrappers if the model includes them
     const cleanedText = rawContent.replace(/```json/g, '').replace(/```/g, '').trim();
     const parsedData = JSON.parse(cleanedText);
 
