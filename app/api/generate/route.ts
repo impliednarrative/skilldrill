@@ -11,56 +11,46 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Standard and Grade Level/Context are required.' }, { status: 400 });
     }
 
-    const systemPrompt = `You are an expert instructional designer specializing in skills-based, hands-on micro-activities and vocational/academic training. 
-Deconstruct the given educational standard into exactly 3 sequential 10-minute instructional blocks (totaling 30 minutes to allow room for classroom management, transition, and assessment) AND provide a complete deck of printable, discrete content cards.
+    const prompt = `You are an expert instructional designer. For the educational standard "${standard}" and grade level/context "${gradeLevel}", generate a 3-block micro-skill activity and a 3x3 card deck.
 
-CRITICAL REQUIREMENTS:
-1. Zero Prep / Stand-Alone: Every block must be fully realized. No referencing outside textbooks.
-2. Printable Card Deck (3x3 Table Layout): Generate a set of discrete content cards (up to 9 single cards or double-sided cards with a Front and Back) containing all necessary data, terms, problem sets, or materials designed for teachers to cut and paste directly into 3x3 card templates.
-3. Universal Design / Inclusive Design: Inherently incorporate accessible, multi-modal learning pathways addressing cognitive, physical, and sensory needs.
-4. Structure: Exactly 3 distinct 10-minute blocks forming a cohesive learning arc, paired with the card deck.
-
-You MUST return your response as a valid JSON object with this exact structure:
+You must output your response STRICTLY as a valid JSON object with no markdown code blocks around it, using this exact format:
 {
-  "unitTitle": "Title of the micro-skill module",
+  "unitTitle": "Short descriptive title",
   "blocks": [
     {
       "blockNumber": 1,
       "title": "Block Title",
       "duration": "10 Mins",
-      "objective": "What students will accomplish",
-      "readyToUseContent": "Verbatim text, prompts, or instructions for this block.",
-      "activitySteps": "Clear execution steps for the 10 minutes.",
-      "inclusiveDesign": "How universal design features are natively embedded."
+      "objective": "Clear objective",
+      "readyToUseContent": "Exact text or prompt for teacher/students",
+      "activitySteps": "Step-by-step execution",
+      "inclusiveDesign": "Universal design feature"
     }
   ],
   "printableCards": [
     {
       "cardNumber": 1,
-      "front": "Content for card front (e.g., term, problem, or data point)",
-      "back": "Content for card back (e.g., definition, answer, or complementary data)"
+      "front": "Card front content",
+      "back": "Card back content"
     }
   ]
 }`;
 
-    const userPrompt = `Target Standard/Topic: ${standard} \nGrade Level / Context: ${gradeLevel}`;
-
     const response = await ai.models.generateContent({
       model: 'gemini-3.8-flash',
-      contents: [
-        { role: 'user', parts: [{ text: systemPrompt }, { text: userPrompt }] }
-      ],
-      config: {
-        responseMimeType: 'application/json',
-      },
+      contents: prompt,
     });
 
-    const parsedData = JSON.parse(response.text || '{}');
+    let rawText = response.text || '{}';
+    // Clean up any accidental markdown formatting if the model includes it
+    rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+
+    const parsedData = JSON.parse(rawText);
     return NextResponse.json({ result: parsedData });
   } catch (error: any) {
-    console.error('Error generating drill:', error);
+    console.error('Error generating micro-skill plan:', error);
     return NextResponse.json(
-      { error: error.message || 'Internal Server Error' },
+      { error: error.message || 'Failed to generate plan. Please try again.' },
       { status: 500 }
     );
   }
