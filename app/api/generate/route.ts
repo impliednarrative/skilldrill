@@ -20,10 +20,10 @@ export async function POST(req: Request) {
     const prompt = `You are an expert instructional designer specializing in skills-based micro-activities.
 For the educational standard "${standard}" and grade level "${gradeLevel}", generate exactly 3 sequential 10-minute instructional blocks (30 minutes total).
 
-CRITICAL PEDAGOGICAL RULE FOR CARDS:
-- Cards are NEVER instructions or commands ("do this"). 
-- Cards ONLY provide raw materials, data points, values, terms, or scenarios that students use as inputs during the activity. The activity steps teach the skill; the cards provide the raw data.
-- Each of the 3 blocks MUST contain its own unique set of EXACTLY 9 data cards (numbered 1 through 9).
+CRITICAL PEDAGOGICAL RULES:
+1. Cards are NEVER instructions or commands ("do this"). Cards ONLY provide raw materials, data points, values, terms, or scenarios that students use as inputs during the activity. The activity steps teach the skill; the cards provide the raw data.
+2. Each block MUST include a "skillDemoExample": a concrete, live worked example demonstrating how the teacher models the target skill before students begin.
+3. Each of the 3 blocks MUST contain its own unique set of EXACTLY 9 data cards (numbered 1 through 9).
 
 Return ONLY a valid JSON object with NO markdown code wrappers, using this exact schema:
 {
@@ -34,6 +34,7 @@ Return ONLY a valid JSON object with NO markdown code wrappers, using this exact
       "title": "Block Title",
       "duration": "10 Mins",
       "objective": "Clear objective",
+      "skillDemoExample": "A concrete, step-by-step model or example the teacher performs live to demonstrate the skill to students.",
       "readyToUseContent": "Context, scenario, or framing for the block",
       "activitySteps": "Step-by-step execution steps explaining how students process the 9 block cards to build the skill",
       "inclusiveDesign": "Universal design feature embedded",

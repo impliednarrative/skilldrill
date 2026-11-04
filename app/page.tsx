@@ -12,6 +12,7 @@ interface CurriculumBlock {
   title: string;
   duration: string;
   objective: string;
+  skillDemoExample: string;
   readyToUseContent: string;
   activitySteps: string;
   inclusiveDesign: string;
@@ -102,16 +103,16 @@ export default function Home() {
           <div className="border-b pb-4">
             <h2 className="text-2xl font-bold text-slate-900">{curriculum.unitTitle}</h2>
             <span className="text-sm font-medium text-blue-600 bg-blue-50 px-3 py-1 rounded-full inline-block mt-2">
-              3 × 10-Minute Skill Blocks with Embedded 9-Card Data Decks
+              3 × 10-Minute Skill Blocks with Live Demo & 9-Card Data Decks
             </span>
           </div>
 
-          {/* 3-Block Sequence with Embedded Block Cards */}
+          {/* 3-Block Sequence */}
           <div className="space-y-8">
             {curriculum.blocks?.map((block) => (
               <div 
                 key={block.blockNumber} 
-                className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm hover:shadow-md transition relative overflow-hidden space-y-5"
+                className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm hover:shadow-md transition relative overflow-hidden space-y-4"
               >
                 <div className="absolute top-0 left-0 w-2 h-full bg-blue-600"></div>
                 
@@ -133,19 +134,26 @@ export default function Home() {
                   <div>
                     <span className="font-semibold text-slate-700">Objective:</span> {block.objective}
                   </div>
+
+                  {/* Skill Demo Example Section */}
+                  <div className="bg-emerald-50/60 p-3.5 rounded-lg border border-emerald-200">
+                    <span className="font-semibold text-emerald-900 block mb-1">Skill Demo Example (Teacher Walkthrough):</span> 
+                    <p className="text-emerald-800 leading-relaxed">{block.skillDemoExample}</p>
+                  </div>
+
                   <div className="bg-blue-50/50 p-3 rounded-lg border border-blue-100">
                     <span className="font-semibold text-blue-900">Framing Context:</span> 
                     <p className="mt-1 text-slate-700">{block.readyToUseContent}</p>
                   </div>
                   <div>
-                    <span className="font-semibold text-slate-700">Activity Steps (Skill Builder):</span> {block.activitySteps}
+                    <span className="font-semibold text-slate-700">Activity Steps:</span> {block.activitySteps}
                   </div>
                   <div className="bg-slate-50 p-3 rounded-lg border border-slate-100">
                     <span className="font-semibold text-slate-700">Inclusive Design:</span> {block.inclusiveDesign}
                   </div>
                 </div>
 
-                {/* Embedded 9-Card Data Deck for this Block */}
+                {/* Embedded 9-Card Raw Data Deck */}
                 {block.blockCards && block.blockCards.length > 0 && (
                   <div className="border-t pt-4 mt-4 border-slate-100">
                     <div className="flex justify-between items-center mb-3">
