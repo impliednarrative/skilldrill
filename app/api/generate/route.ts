@@ -11,26 +11,34 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Standard and Grade Level/Context are required.' }, { status: 400 });
     }
 
-    const systemPrompt = `You are an expert curriculum developer specializing in vocational, trades, and academic instruction. 
-Deconstruct the given educational standard into exactly 5 sequential 10-minute instructional blocks (totaling 50 minutes).
+    const systemPrompt = `You are an expert instructional designer specializing in skills-based, hands-on micro-activities and vocational/academic training. 
+Deconstruct the given educational standard into exactly 5 sequential 10-minute instructional blocks (totaling 50 minutes) AND provide a complete deck of printable, discrete content cards.
 
 CRITICAL REQUIREMENTS:
-1. Zero Prep / Stand-Alone: Every block must contain fully realized, ready-to-use content. Do not tell the teacher to "create a handout" or "prepare questions"—provide the actual questions, text snippets, prompts, or problem sets right inside the block so the teacher can use it instantly with zero external prep.
-2. Universal Design / Inclusive Design: Inherently incorporate accessible, multi-modal learning pathways addressing cognitive, physical, and sensory needs without a separate accommodations list.
-3. Structure: Exactly 5 distinct blocks forming a cohesive 50-minute learning arc.
+1. Zero Prep / Stand-Alone: Every block must be fully realized. No referencing outside textbooks.
+2. Printable Card Deck (3x3 Table Layout): Generate a set of discrete content cards (no more than 18 single cards, or up to 9 double-sided cards with a Front and Back) containing all necessary data, terms, problem sets, or materials. These are designed for teachers to cut and paste directly into 3x3 card templates for card-based activities (e.g., draw-and-answer, matching, sorting, data manipulation).
+3. Universal Design / Inclusive Design: Inherently incorporate accessible, multi-modal learning pathways addressing cognitive, physical, and sensory needs.
+4. Structure: Exactly 5 distinct 10-minute blocks forming a cohesive learning arc, paired with the card deck.
 
 You MUST return your response as a valid JSON object with this exact structure:
 {
-  "unitTitle": "Title of the curriculum unit",
+  "unitTitle": "Title of the micro-skill module",
   "blocks": [
     {
       "blockNumber": 1,
       "title": "Block Title",
       "duration": "10 Mins",
       "objective": "What students will accomplish",
-      "readyToUseContent": "The exact verbatim text, prompts, problem sets, or questions the teacher can project or hand out immediately (zero prep required).",
-      "activitySteps": "Clear execution steps for the teacher and students during the 10 minutes.",
-      "inclusiveDesign": "How universal design features (visual, tactile, auditory, or collaborative scaffolds) are natively embedded."
+      "readyToUseContent": "Verbatim text, prompts, or instructions for this block.",
+      "activitySteps": "Clear execution steps for the 10 minutes.",
+      "inclusiveDesign": "How universal design features are natively embedded."
+    }
+  ],
+  "printableCards": [
+    {
+      "cardNumber": 1,
+      "front": "Content for card front (e.g., term, problem, or data point)",
+      "back": "Content for card back (e.g., definition, answer, or complementary data)"
     }
   ]
 }`;
