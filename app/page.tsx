@@ -60,7 +60,7 @@ export default function Home() {
   return (
     <main className="max-w-4xl mx-auto p-6 font-sans">
       <h1 className="text-3xl font-bold mb-2 text-slate-800">SkillDrill</h1>
-      <p className="text-slate-600 mb-6">5-Block Inclusive Micro-Skill Generator</p>
+      <p className="text-slate-600 mb-6">3-Block Inclusive Micro-Skill Generator</p>
       
       <form onSubmit={handleSubmit} className="space-y-4 bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
         <div>
@@ -92,7 +92,7 @@ export default function Home() {
           disabled={loading}
           className="w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
         >
-          {loading ? 'Generating 5 10-minute activities...' : 'Generate 5 10-minute activities'}
+          {loading ? 'Generating 3 10-minute activities...' : 'Generate 3 10-minute activities'}
         </button>
       </form>
 
@@ -103,7 +103,7 @@ export default function Home() {
           <div className="border-b pb-4">
             <h2 className="text-2xl font-bold text-slate-900">{curriculum.unitTitle}</h2>
             <span className="text-sm font-medium text-blue-600 bg-blue-50 px-3 py-1 rounded-full inline-block mt-2">
-              5 × 10-Minute Blocks + Printable 3x3 Card Deck
+              3 × 10-Minute Blocks + Printable 3x3 Card Deck
             </span>
           </div>
 
@@ -112,7 +112,7 @@ export default function Home() {
             <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 shadow-sm">
               <div className="mb-4">
                 <h3 className="text-xl font-bold text-slate-800">Printable Card Deck (3x3 Table Format)</h3>
-                <p className="text-sm text-slate-600">Cut and paste these items directly into your 3x3 card templates (up to 9 double-sided cards).</p>
+                <p className="text-sm text-slate-600">Cut and paste these items directly into your 3x3 card templates.</p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {curriculum.printableCards.map((card) => (
@@ -132,9 +132,9 @@ export default function Home() {
             </div>
           )}
 
-          {/* 5-Block Instructional Arc */}
+          {/* 3-Block Instructional Arc */}
           <div className="space-y-6">
-            <h3 className="text-xl font-bold text-slate-800">50-Minute Block Sequence</h3>
+            <h3 className="text-xl font-bold text-slate-800">30-Minute Block Sequence</h3>
             <div className="grid grid-cols-1 gap-6">
               {curriculum.blocks?.map((block) => (
                 <div 

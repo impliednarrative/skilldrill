@@ -12,13 +12,13 @@ export async function POST(req: Request) {
     }
 
     const systemPrompt = `You are an expert instructional designer specializing in skills-based, hands-on micro-activities and vocational/academic training. 
-Deconstruct the given educational standard into exactly 5 sequential 10-minute instructional blocks (totaling 50 minutes) AND provide a complete deck of printable, discrete content cards.
+Deconstruct the given educational standard into exactly 3 sequential 10-minute instructional blocks (totaling 30 minutes to allow room for classroom management, transition, and assessment) AND provide a complete deck of printable, discrete content cards.
 
 CRITICAL REQUIREMENTS:
 1. Zero Prep / Stand-Alone: Every block must be fully realized. No referencing outside textbooks.
-2. Printable Card Deck (3x3 Table Layout): Generate a set of discrete content cards (no more than 18 single cards, or up to 9 double-sided cards with a Front and Back) containing all necessary data, terms, problem sets, or materials. These are designed for teachers to cut and paste directly into 3x3 card templates for card-based activities (e.g., draw-and-answer, matching, sorting, data manipulation).
+2. Printable Card Deck (3x3 Table Layout): Generate a set of discrete content cards (up to 9 single cards or double-sided cards with a Front and Back) containing all necessary data, terms, problem sets, or materials designed for teachers to cut and paste directly into 3x3 card templates.
 3. Universal Design / Inclusive Design: Inherently incorporate accessible, multi-modal learning pathways addressing cognitive, physical, and sensory needs.
-4. Structure: Exactly 5 distinct 10-minute blocks forming a cohesive learning arc, paired with the card deck.
+4. Structure: Exactly 3 distinct 10-minute blocks forming a cohesive learning arc, paired with the card deck.
 
 You MUST return your response as a valid JSON object with this exact structure:
 {
