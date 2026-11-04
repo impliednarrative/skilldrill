@@ -17,15 +17,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Standard and Grade Level/Context are required.' }, { status: 400 });
     }
 
-    const prompt = `You are an expert instructional designer specializing in skills-based micro-activities and vocational/academic training.
-Deconstruct the given educational standard into exactly 3 sequential 10-minute instructional blocks (30 minutes total) AND provide a printable deck of content cards for a 3x3 grid (up to 9 double-sided cards).
+    const prompt = `You are an expert instructional designer specializing in skills-based micro-activities.
+For the educational standard "${standard}" and grade level "${gradeLevel}", generate a 3-block micro-skill activity sequence AND a set of discrete, text-only content lines for card templates.
 
-CRITICAL REQUIREMENTS:
-1. Zero Prep / Stand-Alone: Provide actual text, problem sets, or prompt content directly inside the card and block structures.
-2. Structure: 3 distinct 10-minute blocks + up to 9 cards with Front/Back data.
-3. Universal Design: Inherently incorporate accessible, multi-modal learning pathways.
+CRITICAL CONSTRAINTS:
+1. Zero Prep / Stand-Alone: All prompts, text snippets, or problem sets must be fully written out.
+2. 3 Instructional Blocks: Exactly 3 sequential 10-minute blocks (30 minutes total).
+3. Text Card Lines: Generate between 9 and 18 discrete card text lines.
+4. WORD LIMIT: Each card text line MUST NOT exceed 50 words. Ensure the text is clean, direct, and completely readable on a single index/printable card.
 
-Return ONLY a valid JSON object with NO markdown wrapper using this exact schema:
+Return ONLY a valid JSON object with NO markdown code wrappers, using this exact schema:
 {
   "unitTitle": "Title of micro-skill plan",
   "blocks": [
@@ -33,23 +34,19 @@ Return ONLY a valid JSON object with NO markdown wrapper using this exact schema
       "blockNumber": 1,
       "title": "Block Title",
       "duration": "10 Mins",
-      "objective": "What students accomplish",
+      "objective": "Clear objective",
       "readyToUseContent": "Exact text or prompt for teacher/students",
       "activitySteps": "Step-by-step execution steps for 10 mins",
       "inclusiveDesign": "Universal design feature embedded"
     }
   ],
-  "printableCards": [
+  "cardLines": [
     {
-      "cardNumber": 1,
-      "front": "Card front content",
-      "back": "Card back content"
+      "lineNumber": 1,
+      "text": "Card content line (STRICTLY maximum 50 words)."
     }
   ]
-}
-
-Target Standard/Topic: ${standard}
-Grade Level / Context: ${gradeLevel}`;
+}`;
 
     const apiResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
@@ -60,7 +57,7 @@ Grade Level / Context: ${gradeLevel}`;
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "openrouter/free", // Dynamically routes to the best available free model
+        model: "openrouter/free",
         messages: [
           { role: "user", content: prompt }
         ],
@@ -76,7 +73,7 @@ Grade Level / Context: ${gradeLevel}`;
     const data = await apiResponse.json();
     const rawContent = data.choices?.[0]?.message?.content || '{}';
     
-    // Clean up markdown code block fence wrappers if the model includes them
+    // Clean up markdown code block wrappers if present
     const cleanedText = rawContent.replace(/```json/g, '').replace(/```/g, '').trim();
     const parsedData = JSON.parse(cleanedText);
 

@@ -12,16 +12,15 @@ interface CurriculumBlock {
   inclusiveDesign: string;
 }
 
-interface PrintableCard {
-  cardNumber: number;
-  front: string;
-  back: string;
+interface CardLine {
+  lineNumber: number;
+  text: string;
 }
 
 interface CurriculumResult {
   unitTitle: string;
   blocks: CurriculumBlock[];
-  printableCards: PrintableCard[];
+  cardLines: CardLine[];
 }
 
 export default function Home() {
@@ -58,8 +57,8 @@ export default function Home() {
   };
 
   return (
-    <main className="max-w-4xl mx-auto p-6 font-sans">
-      <h1 className="text-3xl font-bold mb-2 text-slate-800">SkillDrill</h1>
+    <main className="max-w-4xl mx-auto p-6 font-sans text-slate-900">
+      <h1 className="text-3xl font-bold mb-1 text-slate-800">SkillDrill</h1>
       <p className="text-slate-600 mb-6">3-Block Inclusive Micro-Skill Generator</p>
       
       <form onSubmit={handleSubmit} className="space-y-4 bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
@@ -103,29 +102,24 @@ export default function Home() {
           <div className="border-b pb-4">
             <h2 className="text-2xl font-bold text-slate-900">{curriculum.unitTitle}</h2>
             <span className="text-sm font-medium text-blue-600 bg-blue-50 px-3 py-1 rounded-full inline-block mt-2">
-              3 × 10-Minute Blocks + Printable 3x3 Card Deck
+              3 × 10-Minute Blocks + Discrete Printable Text Lines
             </span>
           </div>
 
-          {/* Printable Cards Section (3x3 Table Layout Support) */}
-          {curriculum.printableCards && curriculum.printableCards.length > 0 && (
+          {/* Clean Printable Text Lines Section */}
+          {curriculum.cardLines && curriculum.cardLines.length > 0 && (
             <div className="bg-slate-50 border border-slate-200 rounded-xl p-6 shadow-sm">
               <div className="mb-4">
-                <h3 className="text-xl font-bold text-slate-800">Printable Card Deck (3x3 Table Format)</h3>
-                <p className="text-sm text-slate-600">Cut and paste these items directly into your 3x3 card templates.</p>
+                <h3 className="text-xl font-bold text-slate-800">Printable Card Text Lines</h3>
+                <p className="text-sm text-slate-600">
+                  {curriculum.cardLines.length} discrete lines (max 50 words each). Copy and paste directly into your card templates.
+                </p>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {curriculum.printableCards.map((card) => (
-                  <div key={card.cardNumber} className="bg-white border border-slate-300 rounded-lg p-4 shadow-xs flex flex-col justify-between">
-                    <div className="text-xs font-bold text-slate-400 mb-2">CARD #{card.cardNumber}</div>
-                    <div className="space-y-2 text-sm">
-                      <div>
-                        <span className="font-semibold text-blue-600">Front:</span> {card.front}
-                      </div>
-                      <div className="border-t pt-2 mt-2 border-slate-100">
-                        <span className="font-semibold text-emerald-600">Back:</span> {card.back}
-                      </div>
-                    </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {curriculum.cardLines.map((card) => (
+                  <div key={card.lineNumber} className="bg-white border border-slate-300 rounded-lg p-3 shadow-xs">
+                    <div className="text-xs font-bold text-blue-600 mb-1">LINE #{card.lineNumber}</div>
+                    <p className="text-sm text-slate-800 leading-relaxed">{card.text}</p>
                   </div>
                 ))}
               </div>
@@ -134,7 +128,7 @@ export default function Home() {
 
           {/* 3-Block Instructional Arc */}
           <div className="space-y-6">
-            <h3 className="text-xl font-bold text-slate-800">30-Minute Block Sequence</h3>
+            <h3 className="text-xl font-bold text-slate-800">30-Minute Activity Blocks</h3>
             <div className="grid grid-cols-1 gap-6">
               {curriculum.blocks?.map((block) => (
                 <div 
