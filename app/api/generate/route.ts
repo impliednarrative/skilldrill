@@ -60,7 +60,7 @@ Grade Level / Context: ${gradeLevel}`;
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "deepseek/deepseek-r1:free",
+        model: "openrouter/free", // Dynamically routes to the best available free model
         messages: [
           { role: "user", content: prompt }
         ],
@@ -76,6 +76,7 @@ Grade Level / Context: ${gradeLevel}`;
     const data = await apiResponse.json();
     const rawContent = data.choices?.[0]?.message?.content || '{}';
     
+    // Clean up markdown code block fence wrappers if the model includes them
     const cleanedText = rawContent.replace(/```json/g, '').replace(/```/g, '').trim();
     const parsedData = JSON.parse(cleanedText);
 
