@@ -17,29 +17,32 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Standard and Grade Level/Context are required.' }, { status: 400 });
     }
 
-    const prompt = `You are an expert instructional designer specializing in skills-based, active micro-activities.
-For the educational standard "${standard}" and grade level "${gradeLevel}", generate:
-1. A master deck of 9 to 18 discrete card text lines (max 50 words per line) containing actionable data, prompts, problem sets, or scenarios. These cards are the physical engine of the lesson used for sorting, drawing, and task execution.
-2. Exactly 3 sequential 10-minute instructional blocks (30 minutes total). CRITICAL: Each block's "readyToUseContent" MUST explicitly instruct students and teachers on how to use specific cards from the deck to perform the hands-on task. 
+    const prompt = `You are an expert instructional designer specializing in skills-based micro-activities.
+For the educational standard "${standard}" and grade level "${gradeLevel}", generate exactly 3 sequential 10-minute instructional blocks (30 minutes total).
+
+CRITICAL PEDAGOGICAL RULE FOR CARDS:
+- Cards are NEVER instructions or commands ("do this"). 
+- Cards ONLY provide raw materials, data points, values, terms, or scenarios that students use as inputs during the activity. The activity steps teach the skill; the cards provide the raw data.
+- Each of the 3 blocks MUST contain its own unique set of EXACTLY 9 data cards (numbered 1 through 9).
 
 Return ONLY a valid JSON object with NO markdown code wrappers, using this exact schema:
 {
   "unitTitle": "Title of micro-skill plan",
-  "cardLines": [
-    {
-      "lineNumber": 1,
-      "text": "Actionable task, problem set, or scenario (STRICTLY max 50 words)."
-    }
-  ],
   "blocks": [
     {
       "blockNumber": 1,
       "title": "Block Title",
       "duration": "10 Mins",
       "objective": "Clear objective",
-      "readyToUseContent": "Exact instructions leveraging specific card lines (e.g., 'Students draw Card 3 and Card 7 to calculate...')",
-      "activitySteps": "Step-by-step execution for the 10 mins",
-      "inclusiveDesign": "Universal design feature embedded"
+      "readyToUseContent": "Context, scenario, or framing for the block",
+      "activitySteps": "Step-by-step execution steps explaining how students process the 9 block cards to build the skill",
+      "inclusiveDesign": "Universal design feature embedded",
+      "blockCards": [
+        {
+          "cardNumber": 1,
+          "content": "Raw data, value, term, or scenario item (Strictly max 30 words, NO instructions/commands)"
+        }
+      ]
     }
   ]
 }`;
