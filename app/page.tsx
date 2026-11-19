@@ -2,6 +2,11 @@
 
 import { useState } from 'react';
 
+interface BlockCardItem {
+  cardNumber?: number;
+  content: string;
+}
+
 interface SkillBlock {
   blockNumber?: number;
   title: string;
@@ -15,28 +20,52 @@ interface SkillBlock {
 }
 
 interface LessonSequence {
+  unitTitle?: string;
   topic?: string;
   gradeLevel?: string;
   standard?: string;
   blocks: SkillBlock[];
 }
 
-function CoreDrillVortex({ className = 'w-10 h-10' }: { className?: string }) {
+function CoreDrillVortex({ className = 'w-12 h-12' }: { className?: string }) {
   return (
     <span className="inline-flex items-center justify-center">
+      <style>{`
+        @keyframes skilldrillVortexSpin {
+          0% {
+            transform: rotate(-18deg) scaleX(1) skewX(-6deg);
+          }
+          25% {
+            transform: rotate(-18deg) scaleX(0.35) skewX(8deg);
+          }
+          50% {
+            transform: rotate(-18deg) scaleX(1) skewX(6deg);
+          }
+          75% {
+            transform: rotate(-18deg) scaleX(0.35) skewX(-8deg);
+          }
+          100% {
+            transform: rotate(-18deg) scaleX(1) skewX(-6deg);
+          }
+        }
+        .skilldrill-vortex-active {
+          display: inline-block;
+          transform-origin: center center;
+          animation: skilldrillVortexSpin 0.55s ease-in-out infinite;
+          will-change: transform;
+        }
+      `}</style>
       <svg
-        className={`${className} animate-drill-vortex`}
+        className={`${className} skilldrill-vortex-active`}
         viewBox="0 0 64 64"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
         aria-hidden="true"
       >
-        {/* Top cap / core collar */}
         <path
           d="M14 10C14 7.5 22 6 32 6C42 6 50 7.5 50 10L47 16H17L14 10Z"
           fill="#2C2A29"
         />
-        {/* Helical drill flutes tapering down to a sharp point */}
         <path
           d="M17 16C26 19 41 18 47 15L44.5 23C36 26 23 26 19.5 23L17 16Z"
           fill="#B45309"
@@ -53,12 +82,10 @@ function CoreDrillVortex({ className = 'w-10 h-10' }: { className?: string }) {
           d="M24.5 39C29.5 41.5 36.5 41 39 39L35.5 48C33 49 31 49 28.5 48L24.5 39Z"
           fill="#D97706"
         />
-        {/* Drill tip */}
         <path
           d="M28.5 48C30.5 49 33.5 49 35.5 48L32 60L28.5 48Z"
           fill="#2C2A29"
         />
-        {/* Spiral ridges / tornado motion lines */}
         <path
           d="M15 19.5C24 22.5 40 21.5 46 18.5"
           stroke="#FEF3C7"
@@ -88,20 +115,57 @@ function CoreDrillVortex({ className = 'w-10 h-10' }: { className?: string }) {
   );
 }
 
-function normalizeSequence(raw: any, fallbackStandard: string, fallbackGrade: string): LessonSequence | null {
+function toStepsArray(steps: unknown): string[] {
+  if (Array.isArray(steps)) {
+    return steps
+      .map((s) => (typeof s === 'string' ? s.trim() : String(s ?? '').trim()))
+      .filter(Boolean);
+  }
+  if (typeof steps === 'string' && steps.trim()) {
+    const splitLines = steps
+      .split(/\n+|\s*(?:\d+[\).\s]+)\s*/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+    return splitLines.length > 0 ? splitLines : [steps.trim()];
+  }
+  return [];
+}
+
+function toCardsArray(block: any): string[] {
+  const rawCards = Array.isArray(block?.blockCards)
+    ? block.blockCards
+    : Array.isArray(block?.dataDeck)
+      ? block.dataDeck
+      : [];
+
+  return rawCards
+    .map((item: BlockCardItem | string) => {
+      if (typeof item === 'string') return item.trim();
+      if (item && typeof item === 'object') {
+        return String(item.content ?? '').trim();
+      }
+      return '';
+    })
+    .filter(Boolean);
+}
+
+function normalizeSequence(
+  raw: any,
+  fallbackStandard: string,
+  fallbackGrade: string
+): LessonSequence | null {
   if (!raw || typeof raw !== 'object') return null;
 
-  const container = raw.sequence && typeof raw.sequence === 'object'
-    ? raw.sequence
-    : raw.data && typeof raw.data === 'object'
-      ? raw.data
-      : raw;
+  const container =
+    raw.result && typeof raw.result === 'object'
+      ? raw.result
+      : raw.sequence && typeof raw.sequence === 'object'
+        ? raw.sequence
+        : raw.data && typeof raw.data === 'object'
+          ? raw.data
+          : raw;
 
-  const rawBlocks = Array.isArray(container.blocks)
-    ? container.blocks
-    : Array.isArray(raw.blocks)
-      ? raw.blocks
-      : [];
+  const rawBlocks = Array.isArray(container.blocks) ? container.blocks : [];
 
   const blocks: SkillBlock[] = rawBlocks.map((b: any, idx: number) => ({
     blockNumber: b.blockNumber ?? idx + 1,
@@ -109,16 +173,17 @@ function normalizeSequence(raw: any, fallbackStandard: string, fallbackGrade: st
     duration: b.duration ?? '10 Mins',
     objective: b.objective ?? '',
     skillDemoExample: b.skillDemoExample ?? '',
-    framingContext: b.framingContext ?? '',
-    activitySteps: Array.isArray(b.activitySteps) ? b.activitySteps : [],
+    framingContext: b.readyToUseContent ?? b.framingContext ?? '',
+    activitySteps: toStepsArray(b.activitySteps),
     inclusiveDesign: b.inclusiveDesign ?? '',
-    dataDeck: Array.isArray(b.dataDeck) ? b.dataDeck : [],
+    dataDeck: toCardsArray(b),
   }));
 
   return {
-    standard: container.standard || raw.standard || fallbackStandard,
-    topic: container.topic || raw.topic,
-    gradeLevel: container.gradeLevel || raw.gradeLevel || fallbackGrade,
+    unitTitle: container.unitTitle,
+    standard: container.standard || fallbackStandard,
+    topic: container.topic,
+    gradeLevel: container.gradeLevel || fallbackGrade,
     blocks,
   };
 }
@@ -128,6 +193,7 @@ export default function HomePage() {
   const [gradeLevel, setGradeLevel] = useState('Grade 8');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [debugPayload, setDebugPayload] = useState('');
   const [sequence, setSequence] = useState<LessonSequence | null>(null);
 
   const handleGenerate = async (e: React.FormEvent) => {
@@ -136,6 +202,7 @@ export default function HomePage() {
 
     setLoading(true);
     setError('');
+    setDebugPayload('');
     setSequence(null);
 
     try {
@@ -144,7 +211,6 @@ export default function HomePage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           standard: standard.trim(),
-          topic: standard.trim(),
           gradeLevel,
         }),
       });
@@ -154,7 +220,8 @@ export default function HomePage() {
       try {
         data = rawText ? JSON.parse(rawText) : null;
       } catch {
-        throw new Error('Server returned an invalid response format.');
+        setDebugPayload(rawText.slice(0, 1200));
+        throw new Error('Server returned non-JSON response.');
       }
 
       if (!response.ok) {
@@ -163,6 +230,7 @@ export default function HomePage() {
 
       const normalized = normalizeSequence(data, standard.trim(), gradeLevel);
       if (!normalized || normalized.blocks.length === 0) {
+        setDebugPayload(JSON.stringify(data, null, 2).slice(0, 1500));
         throw new Error('Generation completed, but no skill blocks were returned by /api/generate.');
       }
 
@@ -263,8 +331,13 @@ export default function HomePage() {
         )}
 
         {error && (
-          <div className="p-4 rounded-lg bg-red-50 border border-red-200 text-sm text-red-800">
-            {error}
+          <div className="p-4 rounded-lg bg-red-50 border border-red-200 text-sm text-red-800 space-y-2">
+            <p className="font-semibold">{error}</p>
+            {debugPayload && (
+              <pre className="text-xs bg-white/80 border border-red-200 rounded p-2.5 overflow-x-auto text-stone-800">
+                {debugPayload}
+              </pre>
+            )}
           </div>
         )}
       </section>
@@ -274,13 +347,10 @@ export default function HomePage() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-stone-200 pb-4">
             <div>
               <h2 className="text-2xl font-bold text-stone-900">
-                {sequence.standard || sequence.topic}
+                {sequence.unitTitle || sequence.standard || sequence.topic}
               </h2>
               <p className="text-sm text-stone-600">
-                {sequence.gradeLevel}
-                {sequence.topic && sequence.standard && sequence.topic !== sequence.standard
-                  ? ` - ${sequence.topic}`
-                  : ''}
+                {sequence.standard} • {sequence.gradeLevel}
               </p>
             </div>
             <button
