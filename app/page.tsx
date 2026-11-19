@@ -3,9 +3,9 @@
 import { useState } from 'react';
 
 interface SkillBlock {
-  blockNumber: number;
+  blockNumber?: number;
   title: string;
-  duration: string;
+  duration?: string;
   objective: string;
   skillDemoExample: string;
   framingContext: string;
@@ -16,29 +16,111 @@ interface SkillBlock {
 
 interface LessonSequence {
   topic?: string;
-  gradeLevel: string;
-  standard: string;
+  gradeLevel?: string;
+  standard?: string;
   blocks: SkillBlock[];
 }
 
-function DrillSpinner({ className = 'w-5 h-5' }: { className?: string }) {
+function CoreDrillVortex({ className = 'w-10 h-10' }: { className?: string }) {
   return (
-    <svg
-      className={`${className} animate-spin`}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M14 9h5v6h-5z" />
-      <path d="M19 11h3l2 1-2 1h-3" />
-      <path d="M14 10H5a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h9" />
-      <path d="M7 16v3h2l1-3" />
-    </svg>
+    <span className="inline-flex items-center justify-center">
+      <svg
+        className={`${className} animate-drill-vortex`}
+        viewBox="0 0 64 64"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+      >
+        {/* Top cap / core collar */}
+        <path
+          d="M14 10C14 7.5 22 6 32 6C42 6 50 7.5 50 10L47 16H17L14 10Z"
+          fill="#2C2A29"
+        />
+        {/* Helical drill flutes tapering down to a sharp point */}
+        <path
+          d="M17 16C26 19 41 18 47 15L44.5 23C36 26 23 26 19.5 23L17 16Z"
+          fill="#B45309"
+        />
+        <path
+          d="M19.5 23C27 26 40 25 44.5 23L42 31C34 34 25 34 22 31L19.5 23Z"
+          fill="#D97706"
+        />
+        <path
+          d="M22 31C28.5 34 38 33 42 31L39 39C33 41.5 27 41.5 24.5 39L22 31Z"
+          fill="#B45309"
+        />
+        <path
+          d="M24.5 39C29.5 41.5 36.5 41 39 39L35.5 48C33 49 31 49 28.5 48L24.5 39Z"
+          fill="#D97706"
+        />
+        {/* Drill tip */}
+        <path
+          d="M28.5 48C30.5 49 33.5 49 35.5 48L32 60L28.5 48Z"
+          fill="#2C2A29"
+        />
+        {/* Spiral ridges / tornado motion lines */}
+        <path
+          d="M15 19.5C24 22.5 40 21.5 46 18.5"
+          stroke="#FEF3C7"
+          strokeWidth="1.75"
+          strokeLinecap="round"
+        />
+        <path
+          d="M18.5 27C26.5 29.5 39 28.5 43.5 26"
+          stroke="#FEF3C7"
+          strokeWidth="1.75"
+          strokeLinecap="round"
+        />
+        <path
+          d="M21.5 34.5C28 36.8 37.5 36 41 34"
+          stroke="#FEF3C7"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+        />
+        <path
+          d="M24 42C29 44 36 43.5 38.5 41.8"
+          stroke="#FEF3C7"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+        />
+      </svg>
+    </span>
   );
+}
+
+function normalizeSequence(raw: any, fallbackStandard: string, fallbackGrade: string): LessonSequence | null {
+  if (!raw || typeof raw !== 'object') return null;
+
+  const container = raw.sequence && typeof raw.sequence === 'object'
+    ? raw.sequence
+    : raw.data && typeof raw.data === 'object'
+      ? raw.data
+      : raw;
+
+  const rawBlocks = Array.isArray(container.blocks)
+    ? container.blocks
+    : Array.isArray(raw.blocks)
+      ? raw.blocks
+      : [];
+
+  const blocks: SkillBlock[] = rawBlocks.map((b: any, idx: number) => ({
+    blockNumber: b.blockNumber ?? idx + 1,
+    title: b.title ?? `Block ${idx + 1}`,
+    duration: b.duration ?? '10 Mins',
+    objective: b.objective ?? '',
+    skillDemoExample: b.skillDemoExample ?? '',
+    framingContext: b.framingContext ?? '',
+    activitySteps: Array.isArray(b.activitySteps) ? b.activitySteps : [],
+    inclusiveDesign: b.inclusiveDesign ?? '',
+    dataDeck: Array.isArray(b.dataDeck) ? b.dataDeck : [],
+  }));
+
+  return {
+    standard: container.standard || raw.standard || fallbackStandard,
+    topic: container.topic || raw.topic,
+    gradeLevel: container.gradeLevel || raw.gradeLevel || fallbackGrade,
+    blocks,
+  };
 }
 
 export default function HomePage() {
@@ -67,15 +149,26 @@ export default function HomePage() {
         }),
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to generate skill sequence.');
+      const rawText = await response.text();
+      let data: any = null;
+      try {
+        data = rawText ? JSON.parse(rawText) : null;
+      } catch {
+        throw new Error('Server returned an invalid response format.');
       }
 
-      setSequence(data);
+      if (!response.ok) {
+        throw new Error(data?.error || 'Failed to generate skill sequence.');
+      }
+
+      const normalized = normalizeSequence(data, standard.trim(), gradeLevel);
+      if (!normalized || normalized.blocks.length === 0) {
+        throw new Error('Generation completed, but no skill blocks were returned by /api/generate.');
+      }
+
+      setSequence(normalized);
     } catch (err: any) {
-      setError(err.message || 'An unexpected error occurred.');
+      setError(err?.message || 'An unexpected error occurred.');
     } finally {
       setLoading(false);
     }
@@ -143,7 +236,7 @@ export default function HomePage() {
             >
               {loading ? (
                 <>
-                  <DrillSpinner className="w-4 h-4" />
+                  <CoreDrillVortex className="w-5 h-5" />
                   <span>Drilling Standard...</span>
                 </>
               ) : (
@@ -155,15 +248,15 @@ export default function HomePage() {
 
         {loading && (
           <div className="border-t border-stone-200 pt-6 flex flex-col items-center justify-center space-y-3 text-center">
-            <div className="flex items-center justify-center w-14 h-14 rounded-full bg-amber-100/80 border border-amber-300 text-amber-800">
-              <DrillSpinner className="w-8 h-8" />
+            <div className="flex items-center justify-center w-20 h-20 rounded-full bg-amber-50 border border-amber-200">
+              <CoreDrillVortex className="w-14 h-14" />
             </div>
             <div>
               <p className="text-sm font-semibold text-stone-900">
-                Unpacking {standard.trim()} &amp; isolating micro-skills...
+                Pierce the standard: {standard.trim()}
               </p>
               <p className="text-xs text-stone-500 mt-0.5">
-                Building three 10-minute blocks and 27 raw input cards
+                Isolating micro-skills, building 3 blocks, and cutting 27 raw input cards
               </p>
             </div>
           </div>
@@ -176,7 +269,7 @@ export default function HomePage() {
         )}
       </section>
 
-      {sequence && (
+      {sequence && sequence.blocks.length > 0 && (
         <div className="space-y-8">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-stone-200 pb-4">
             <div>
@@ -198,7 +291,7 @@ export default function HomePage() {
             </button>
           </div>
 
-          {sequence.blocks?.map((block, index) => (
+          {sequence.blocks.map((block, index) => (
             <section
               key={block.blockNumber || index}
               className="bg-white border border-stone-200 rounded-xl overflow-hidden shadow-xs"
