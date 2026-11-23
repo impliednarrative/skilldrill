@@ -41,7 +41,11 @@ export default function RootLayout({
               <Link href="/best-practices" className="text-stone-700 hover:text-amber-700 transition">
                 Best Practices
               </Link>
-            </nav>
+            </Link>
+              <Link href="/about" className="text-stone-700 hover:text-amber-700 transition">
+                About
+              </Link>
+              </nav>
           </div>
         </header>
 
