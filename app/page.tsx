@@ -278,18 +278,24 @@ export default function HomePage() {
                 Grade Band
               </label>
               <select
-                value={gradeLevel}
-                onChange={(e) => setGradeLevel(e.target.value)}
-                className="w-full rounded-lg border border-stone-300 bg-stone-50/50 px-3.5 py-2.5 text-sm text-stone-900 focus:border-amber-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-700/20 transition"
-              >
-                <option value="Grades 4-5">Grades 4-5</option>
-                <option value="Grade 6">Grade 6</option>
-                <option value="Grade 7">Grade 7</option>
-                <option value="Grade 8">Grade 8</option>
-                <option value="Grades 9-10">Grades 9-10</option>
-                <option value="Grades 11-12">Grades 11-12</option>
-                <option value="Adult / Vocational">Adult / Vocational</option>
-              </select>
+  value={gradeLevel}
+  onChange={(e) => setGradeLevel(e.target.value)}
+  className="w-full rounded-lg border border-stone-300 bg-stone-50/50 px-3.5 py-2.5 text-sm text-stone-900 focus:border-amber-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-700/20 transition"
+>
+  <option value="Grade 1">Grade 1</option>
+  <option value="Grade 2">Grade 2</option>
+  <option value="Grade 3">Grade 3</option>
+  <option value="Grade 4">Grade 4</option>
+  <option value="Grade 5">Grade 5</option>
+  <option value="Grade 6">Grade 6</option>
+  <option value="Grade 7">Grade 7</option>
+  <option value="Grade 8">Grade 8</option>
+  <option value="Grade 9">Grade 9</option>
+  <option value="Grade 10">Grade 10</option>
+  <option value="Grade 11">Grade 11</option>
+  <option value="Grade 12">Grade 12</option>
+  <option value="Adult / Vocational">Adult / Vocational</option>
+</select>
             </div>
           </div>
 
